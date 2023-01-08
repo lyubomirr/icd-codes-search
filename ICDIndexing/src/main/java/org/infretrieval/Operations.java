@@ -2,8 +2,8 @@ package org.infretrieval;
 
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.queryparser.classic.ParseException;
-import org.infretrieval.index.Indexer;
-import org.infretrieval.index.Searcher;
+import org.infretrieval.indexing.Indexer;
+import org.infretrieval.indexing.Searcher;
 import org.infretrieval.reader.DatasetReader;
 
 import java.io.IOException;
