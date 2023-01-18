@@ -41,10 +41,12 @@ public class Indexer implements Closeable {
 
         var id = new StringField("id", Long.toString(entry.index()), Field.Store.YES);
         var code = new StringField("code", entry.code(), Field.Store.YES);
+        var shortCode = new StringField("shortCode", entry.shortCode(), Field.Store.YES);
         var description = new TextField("description", entry.description(), Field.Store.NO);
 
         doc.add(id);
         doc.add(code);
+        doc.add(shortCode);
         doc.add(description);
 
         writer.addDocument(doc);

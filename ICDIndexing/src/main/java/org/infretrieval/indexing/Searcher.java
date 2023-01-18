@@ -7,6 +7,7 @@ import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.ScoreDoc;
 import org.apache.lucene.store.FSDirectory;
+import org.infretrieval.model.SearchResult;
 
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -23,14 +24,14 @@ public class Searcher {
         this.parser = new QueryParser("description", analyzer);
     }
 
-    public List<String> search(String queryText, int n) throws ParseException, IOException {
-        var query = parser.parse(queryText);
+    public List<SearchResult> search(String queryText, int n) throws ParseException, IOException {
+        var query = parser.parse(QueryParser.escape(queryText));
         var foundDocs = searcher.search(query, n);
 
-        var results = new ArrayList<String>();
+        var results = new ArrayList<SearchResult>();
         for(ScoreDoc scoreDoc : foundDocs.scoreDocs) {
             var document = searcher.doc(scoreDoc.doc);
-            results.add(document.get("code"));
+            results.add(new SearchResult(document.get("code"), document.get("shortCode")));
         }
         return results;
     }

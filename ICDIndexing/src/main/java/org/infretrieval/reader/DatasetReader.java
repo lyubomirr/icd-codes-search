@@ -44,7 +44,8 @@ public class DatasetReader implements Iterable<ICDCodeEntry> {
         @Override
         public ICDCodeEntry next() {
             var record = parser.iterator().next();
-            return new ICDCodeEntry(record.getRecordNumber(), record.get(0), record.get(1));
+            return new ICDCodeEntry(record.getRecordNumber(), record.get(0),
+                    record.get(0).substring(0, 3), record.get(1));
         }
 
         @Override
