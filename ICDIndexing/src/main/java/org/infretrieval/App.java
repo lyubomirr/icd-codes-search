@@ -15,8 +15,10 @@ public class App {
 //           System.out.println(String.join("\n", results));
 //       }
         //Operations.evaluateOnStemmedIndex(false);
-        //Operations.evaluateOnStandardIndex(false);
-        Operations.indexTrainSet(new BulgarianAnalyzer(), "indices/index-bg-stem");
-        Operations.indexTrainSet(new StandardAnalyzer(), "indices/index");
+        Operations.evaluateOnStandardIndex();
+        //Operations.indexTrainSet(new BulgarianAnalyzer(), "indices/index-bg-stem");
+        //Operations.indexTrainSet(new StandardAnalyzer(), "indices/index");
+        //Operations.indexTrainSet(new BulgarianAnalyzer(), "train_merged.csv", "indices/index-bg-stem-merged");
+        //Operations.evaluateOnStemmedIndexMerged(true);
     }
 }

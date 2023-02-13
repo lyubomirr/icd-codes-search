@@ -4,10 +4,16 @@ import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.analysis.bg.BulgarianAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.queryparser.classic.ParseException;
+import org.apache.lucene.search.similarities.BM25Similarity;
+import org.apache.lucene.search.similarities.BooleanSimilarity;
+import org.apache.lucene.search.similarities.ClassicSimilarity;
+import org.apache.lucene.search.similarities.MultiSimilarity;
+import org.apache.lucene.search.similarities.Similarity;
 import org.infretrieval.indexing.Indexer;
 import org.infretrieval.indexing.Searcher;
 import org.infretrieval.metrics.Precision;
 import org.infretrieval.metrics.ReciprocalRank;
+import org.infretrieval.model.EvaluationResult;
 import org.infretrieval.model.ICDCodeEntry;
 import org.infretrieval.model.SearchResult;
 import org.infretrieval.reader.DatasetReader;
@@ -17,30 +23,60 @@ import java.util.List;
 import java.util.function.Predicate;
 
 public class Operations {
-    public static void indexTrainSet(Analyzer analyzer, String indexPath) throws IOException {
-        var reader = new DatasetReader("train.csv");
+    private static final Similarity[] SIMILARITIES = new Similarity[] {
+            new BM25Similarity(),
+            new ClassicSimilarity(),
+            new BooleanSimilarity(),
+            new MultiSimilarity(new Similarity[]{ new BM25Similarity(), new ClassicSimilarity()})
+    };
+
+    public static void indexTrainSet(Analyzer analyzer, String datasetPath, String indexPath) throws IOException {
+        var reader = new DatasetReader(datasetPath);
         try(var indexer = new Indexer(indexPath, analyzer)) {
             indexer.index(reader);
         }
     }
 
     public static List<SearchResult> searchIndex(String query, int n) throws IOException, ParseException {
-        var searcher = new Searcher("indices/index", new StandardAnalyzer());
+        var searcher = new Searcher("indices/index", new StandardAnalyzer(), new BM25Similarity());
         return searcher.search(query, n);
     }
 
-    public static void evaluateOnStemmedIndex(boolean useShortCodes) throws IOException, ParseException {
-        evaluateTestSet(new BulgarianAnalyzer(), "indices/index-bg-stem", useShortCodes);
+    public static void evaluateOnStemmedIndex() throws IOException, ParseException {
+        evaluateTestSet(new BulgarianAnalyzer(), "indices/index-bg-stem");
     }
 
-    public static void evaluateOnStandardIndex(boolean useShortCodes) throws IOException, ParseException {
-        evaluateTestSet(new StandardAnalyzer(), "index", useShortCodes);
+    public static void evaluateOnStemmedIndexMerged() throws IOException, ParseException {
+        evaluateTestSet(new BulgarianAnalyzer(), "indices/index-bg-stem-merged");
     }
 
-    private static void evaluateTestSet(Analyzer analyzer, String indexPath, boolean useShortCodes)
+    public static void evaluateOnStandardIndex() throws IOException, ParseException {
+        evaluateTestSet(new StandardAnalyzer(), "indices/index");
+    }
+
+    public static void evaluateOnStandardIndexMerged() throws IOException, ParseException {
+        evaluateTestSet(new StandardAnalyzer(), "indices/index-merged");
+    }
+
+    private static void evaluateTestSet(Analyzer analyzer, String indexPath)
             throws IOException, ParseException {
+        for(var similarity : SIMILARITIES)  {
+            System.out.println("Results using short codes:");
+            var shortCodesResult = evaluateTestSet(analyzer, indexPath, true, similarity);
+            System.out.println(shortCodesResult);
+
+            System.out.println("Results using long codes:");
+            var longCodesResult = evaluateTestSet(analyzer, indexPath, false, similarity);
+            System.out.println(longCodesResult);
+        }
+    }
+
+    private static EvaluationResult evaluateTestSet(Analyzer analyzer,
+                                                  String indexPath,
+                                                  boolean useShortCodes,
+                                                  Similarity similarity) throws IOException, ParseException {
         var reader = new DatasetReader("test.csv");
-        var searcher = new Searcher(indexPath, analyzer);
+        var searcher = new Searcher(indexPath, analyzer, similarity);
 
         double precisionAt5Total = 0.0;
         double precisionAt3Total = 0.0;
@@ -63,10 +99,11 @@ public class Operations {
             totalCount++;
         }
 
-        System.out.println("Total docs: " + totalCount);
-        System.out.printf("Precision@5: %f\n", precisionAt5Total/totalCount);
-        System.out.printf("Precision@3: %f\n", precisionAt3Total/totalCount);
-        System.out.printf("MRR: %f\n", reciprocalRankTotal/totalCount);
-        System.out.printf("Accuracy: %f\n", accurate * 1.0/totalCount);
+        return new EvaluationResult(totalCount,
+                precisionAt3Total/totalCount,
+                precisionAt5Total/totalCount,
+                reciprocalRankTotal/totalCount,
+                accurate * 1.0/totalCount,
+                similarity.getClass().getSimpleName());
     }
 }

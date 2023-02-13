@@ -6,6 +6,7 @@ import org.apache.lucene.queryparser.classic.ParseException;
 import org.apache.lucene.queryparser.classic.QueryParser;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.ScoreDoc;
+import org.apache.lucene.search.similarities.Similarity;
 import org.apache.lucene.store.FSDirectory;
 import org.infretrieval.model.SearchResult;
 
@@ -18,9 +19,10 @@ public class Searcher {
     private final IndexSearcher searcher;
     private final QueryParser parser;
 
-    public Searcher(String indexPath, Analyzer analyzer) throws IOException {
+    public Searcher(String indexPath, Analyzer analyzer, Similarity similarity) throws IOException {
         var reader = DirectoryReader.open(FSDirectory.open(Paths.get(indexPath)));
         this.searcher = new IndexSearcher(reader);
+        this.searcher.setSimilarity(similarity);
         this.parser = new QueryParser("description", analyzer);
     }
 

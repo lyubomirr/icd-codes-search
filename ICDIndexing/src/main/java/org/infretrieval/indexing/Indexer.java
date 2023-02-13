@@ -1,6 +1,5 @@
 package org.infretrieval.indexing;
 
-import lombok.RequiredArgsConstructor;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.document.Document;
 import org.apache.lucene.document.Field;
@@ -16,7 +15,6 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.nio.file.Paths;
 
-@RequiredArgsConstructor
 public class Indexer implements Closeable {
     private final IndexWriter writer;
 
