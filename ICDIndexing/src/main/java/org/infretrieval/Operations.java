@@ -1,6 +1,7 @@
 package org.infretrieval;
 
 import org.apache.lucene.analysis.Analyzer;
+import org.apache.lucene.analysis.CharArraySet;
 import org.apache.lucene.analysis.bg.BulgarianAnalyzer;
 import org.apache.lucene.analysis.standard.StandardAnalyzer;
 import org.apache.lucene.queryparser.classic.ParseException;
@@ -16,6 +17,7 @@ import org.infretrieval.metrics.ReciprocalRank;
 import org.infretrieval.model.EvaluationResult;
 import org.infretrieval.model.ICDCodeEntry;
 import org.infretrieval.model.SearchResult;
+import org.infretrieval.preprocessing.CustomStopwords;
 import org.infretrieval.reader.DatasetReader;
 
 import java.io.IOException;
@@ -56,6 +58,11 @@ public class Operations {
 
     public static void evaluateOnStandardIndexMerged() throws IOException, ParseException {
         evaluateTestSet(new StandardAnalyzer(), "indices/index-merged");
+    }
+
+    public static void evaluateOnCustomStopWordsIndex() throws IOException, ParseException {
+        evaluateTestSet(new StandardAnalyzer(new CharArraySet(CustomStopwords.WORDS, true)),
+                "indices/index-custom-stop");
     }
 
     private static void evaluateTestSet(Analyzer analyzer, String indexPath)
