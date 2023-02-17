@@ -14,6 +14,6 @@ public record EvaluationResult(int totalDocs,
                 "Precision@3:" + precisionAt3 + "\n" +
                 "Precision@5:" + precisionAt5 + "\n" +
                 "MRR:" + mrr + "\n" +
-                "Accuracy:" + mrr + "\n";
+                "Accuracy:" + accuracy + "\n";
     }
 }

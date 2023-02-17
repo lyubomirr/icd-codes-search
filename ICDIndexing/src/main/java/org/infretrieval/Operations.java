@@ -65,6 +65,11 @@ public class Operations {
                 "indices/index-custom-stop");
     }
 
+    public static void evaluateOnCustomStopWordsIndexMerged() throws IOException, ParseException {
+        evaluateTestSet(new StandardAnalyzer(new CharArraySet(CustomStopwords.WORDS, true)),
+                "indices/index-custom-stop-merged");
+    }
+
     private static void evaluateTestSet(Analyzer analyzer, String indexPath)
             throws IOException, ParseException {
         for(var similarity : SIMILARITIES)  {
